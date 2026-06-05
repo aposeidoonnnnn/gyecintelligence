@@ -135,7 +135,7 @@ body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans',sans
 
 /* TICKER */
 .ticker {
-  background:var(--text);
+  background:#000;
   color:#fff;
   height:28px;
   display:flex;
@@ -1218,8 +1218,6 @@ function toggleTheme(){
   const isDark = html.getAttribute('data-theme') === 'dark';
   html.setAttribute('data-theme', isDark ? 'light' : 'dark');
   document.getElementById('themeBtn').textContent = isDark ? '☀' : '☾';
-  // update ticker bg
-  document.querySelector('.ticker').style.background = isDark ? '#000' : '';
 }
 
 renderSidebar();
