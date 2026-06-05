@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GYEC 2026 — Finals Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f3ef;
+  --surface: #ffffff;
+  --surface2: #f0ede8;
+  --border: #d8d3cc;
+  --border2: #000000;
+  --accent: #c41e3a;
+  --accent2: #1a3a5c;
+  --text: #0a0a0a;
+  --text-dim: #888;
+  --text-mid: #444;
+  --high: #c41e3a;
+  --mid: #c47e1e;
+  --low: #1a7a3a;
+  --you: #1a3a5c;
+  --list-w: 320px;
+}
+[data-theme="dark"] {
+  --bg: #0c0c0c;
+  --surface: #141414;
+  --surface2: #1c1c1c;
+  --border: #2a2a2a;
+  --border2: #ffffff;
+  --text: #e8e4de;
+  --text-dim: #555;
+  --text-mid: #999;
+  --high: #f54242;
+  --mid: #f5a442;
+  --low: #42c46a;
+  --you: #42aaff;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { height:100%; overflow:hidden; }
+body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans',sans-serif; display:flex; flex-direction:column; }
+
+/* TOP BAR */
+.topbar {
+  display:grid;
+  grid-template-columns:var(--list-w) 1fr;
+  border-bottom:2px solid var(--border2);
+  flex-shrink:0;
+}
+.topbar-left {
+  padding:16px 20px;
+  border-right:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.logo {
+  font-family:'Playfair Display',serif;
+  font-size:18px;
+  font-weight:900;
+  letter-spacing:-0.5px;
+  line-height:1;
+}
+.logo em { font-style:italic; color:var(--accent); }
+.logo-sub {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;
+  color:var(--text-dim);
+  letter-spacing:2px;
+  text-transform:uppercase;
+  margin-top:3px;
+}
+.topbar-right {
+  padding:0 28px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.topbar-meta {
+  display:flex;
+  gap:32px;
+  align-items:center;
+}
+.meta-item { text-align:center; }
+.meta-val {
+  font-family:'Playfair Display',serif;
+  font-size:22px;
+  font-weight:700;
+  line-height:1;
+}
+.meta-val.red { color:var(--high); }
+.meta-val.orange { color:var(--mid); }
+.meta-val.green { color:var(--low); }
+.meta-val.blue { color:var(--you); }
+.meta-label {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:8px;
+  color:var(--text-dim);
+  letter-spacing:2px;
+  text-transform:uppercase;
+  margin-top:2px;
+}
+.score-block {
+  border-left:1px solid var(--border);
+  padding-left:28px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+.score-tag {
+  background:var(--you);
+  color:#fff;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;
+  padding:3px 8px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+.score-num {
+  font-family:'Playfair Display',serif;
+  font-size:28px;
+  font-weight:900;
+  color:var(--you);
+  line-height:1;
+}
+.score-denom {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;
+  color:var(--text-dim);
+  letter-spacing:1px;
+  display:block;
+  margin-top:2px;
+}
+
+/* TICKER */
+.ticker {
+  background:var(--text);
+  color:#fff;
+  height:28px;
+  display:flex;
+  align-items:center;
+  overflow:hidden;
+  flex-shrink:0;
+}
+.ticker-inner {
+  display:flex;
+  animation:tick 40s linear infinite;
+  white-space:nowrap;
+  gap:0;
+}
+.ticker-item {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  letter-spacing:1px;
+  padding:0 24px;
+  border-right:1px solid #333;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  height:28px;
+}
+.ticker-item .dot { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+.dot.high{background:var(--high);} .dot.mid{background:var(--mid);} .dot.low{background:var(--low);} .dot.you{background:#42d4f5;}
+@keyframes tick { 0%{transform:translateX(0);} 100%{transform:translateX(-50%);} }
+
+/* MAIN SPLIT */
+.main {
+  display:grid;
+  grid-template-columns:var(--list-w) 1fr;
+  flex:1;
+  overflow:hidden;
+}
+
+/* LEFT — TEAM LIST */
+.list-panel {
+  border-right:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+.list-search {
+  padding:12px 16px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+  position:relative;
+}
+.list-search input {
+  width:100%;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  padding:8px 12px 8px 32px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  color:var(--text);
+  outline:none;
+  transition:border-color .15s;
+}
+.list-search input:focus { border-color:var(--text); }
+.list-search input::placeholder { color:var(--text-dim); }
+.list-search::before {
+  content:'⌕';
+  position:absolute;
+  left:25px;
+  top:50%;
+  transform:translateY(-50%);
+  font-size:16px;
+  color:var(--text-dim);
+  pointer-events:none;
+}
+.list-scroll {
+  overflow-y:auto;
+  flex:1;
+}
+.list-scroll::-webkit-scrollbar { width:3px; }
+.list-scroll::-webkit-scrollbar-thumb { background:var(--border); }
+
+.group-header {
+  padding:10px 16px 4px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  position:sticky;
+  top:0;
+  background:var(--bg);
+  z-index:2;
+}
+.group-label {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:8px;
+  color:var(--text-dim);
+  letter-spacing:3px;
+  text-transform:uppercase;
+}
+.group-line { flex:1; height:1px; background:var(--border); }
+.group-count {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:8px;
+  color:var(--text-dim);
+}
+
+.team-row {
+  display:flex;
+  align-items:center;
+  padding:9px 16px;
+  cursor:pointer;
+  border-bottom:1px solid transparent;
+  transition:background .1s;
+  gap:10px;
+  border-left:3px solid transparent;
+}
+.team-row:hover { background:var(--surface); }
+.team-row.active {
+  background:var(--surface);
+  border-left-color:var(--text);
+}
+.tr-num {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;
+  color:var(--text-dim);
+  width:20px;
+  flex-shrink:0;
+}
+.tr-info { flex:1; min-width:0; }
+.tr-name {
+  font-size:13px;
+  font-weight:500;
+  color:var(--text-mid);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  line-height:1.2;
+}
+.team-row:hover .tr-name, .team-row.active .tr-name { color:var(--text); }
+.tr-country {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;
+  color:var(--text-dim);
+  margin-top:1px;
+}
+.tr-right {
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:3px;
+  flex-shrink:0;
+}
+.tr-members {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:8px;
+  color:var(--text-dim);
+}
+.tr-threat {
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  flex-shrink:0;
+}
+.tr-threat.high { background:var(--high); }
+.tr-threat.mid { background:var(--mid); }
+.tr-threat.low { background:var(--low); }
+.tr-threat.you { background:var(--you); }
+
+/* RIGHT — DETAIL */
+.detail-panel {
+  overflow-y:auto;
+  background:var(--surface);
+}
+.detail-panel::-webkit-scrollbar { width:4px; }
+.detail-panel::-webkit-scrollbar-thumb { background:var(--border); }
+
+.empty-state {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  height:100%;
+  gap:12px;
+}
+.empty-title {
+  font-family:'Playfair Display',serif;
+  font-size:36px;
+  font-weight:400;
+  font-style:italic;
+  color:var(--border);
+}
+.empty-sub {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  color:var(--border);
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+
+/* DETAIL CONTENT */
+.detail-inner { padding:36px 48px; max-width:820px; }
+
+.d-eyebrow {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;
+  color:var(--text-dim);
+  letter-spacing:3px;
+  text-transform:uppercase;
+  margin-bottom:8px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.d-divider { flex:1; height:1px; background:var(--border); }
+
+.d-headline {
+  font-family:'Playfair Display',serif;
+  font-size:48px;
+  font-weight:900;
+  line-height:1;
+  margin-bottom:4px;
+  letter-spacing:-1px;
+}
+.d-subhead {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  color:var(--text-dim);
+  letter-spacing:1px;
+  margin-bottom:20px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  flex-wrap:wrap;
+}
+.d-subhead span { display:flex; align-items:center; gap:6px; }
+.d-subhead span::before { content:'·'; color:var(--border); }
+.d-subhead span:first-child::before { content:''; }
+
+.d-badge {
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:4px 10px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;
+  font-weight:500;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  border:1px solid;
+  margin-bottom:24px;
+}
+.d-badge.high { color:var(--high); border-color:var(--high); background:rgba(196,30,58,.06); }
+.d-badge.mid { color:var(--mid); border-color:var(--mid); background:rgba(196,126,30,.06); }
+.d-badge.low { color:var(--low); border-color:var(--low); background:rgba(26,122,58,.06); }
+.d-badge.you { color:var(--you); border-color:var(--you); background:rgba(26,58,92,.06); }
+
+.score-bar-row {
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:1px;
+  background:var(--border);
+  border:1px solid var(--border);
+  margin-bottom:28px;
+}
+.score-cell {
+  background:var(--surface);
+  padding:12px 16px;
+}
+.score-cell-label {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:8px;
+  color:var(--text-dim);
+  letter-spacing:2px;
+  text-transform:uppercase;
+  margin-bottom:6px;
+}
+.score-cell-val {
+  font-family:'Playfair Display',serif;
+  font-size:20px;
+  font-weight:700;
+  color:var(--you);
+}
+
+.d-section { margin-bottom:28px; }
+.d-section-label {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;
+  color:var(--text-dim);
+  letter-spacing:3px;
+  text-transform:uppercase;
+  padding-bottom:8px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:14px;
+}
+.d-body {
+  font-size:14px;
+  line-height:1.75;
+  color:var(--text-mid);
+}
+.d-body strong { color:var(--text); font-weight:600; }
+
+.d-list-item {
+  display:flex;
+  gap:12px;
+  padding:7px 0;
+  border-bottom:1px solid var(--surface2);
+  font-size:13px;
+  color:var(--text-mid);
+  line-height:1.5;
+}
+.d-list-item:last-child { border-bottom:none; }
+.d-plus { color:var(--low); font-weight:600; flex-shrink:0; width:12px; }
+.d-minus { color:var(--high); font-weight:600; flex-shrink:0; width:12px; }
+
+.tags-row { display:flex; flex-wrap:wrap; gap:6px; margin-top:16px; }
+.tag {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;
+  padding:3px 8px;
+  border:1px solid var(--border);
+  color:var(--text-dim);
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+
+.d-verdict {
+  background:var(--surface2);
+  border-left:3px solid var(--text);
+  padding:16px 20px;
+  margin-bottom:28px;
+}
+.d-verdict p {
+  font-size:14px;
+  line-height:1.7;
+  color:var(--text-mid);
+  font-style:italic;
+}
+.d-verdict p strong { color:var(--text); font-style:normal; }
+
+.d-video-box {
+  background:var(--surface2);
+  border:1px solid var(--border);
+  padding:16px 20px;
+  margin-bottom:28px;
+}
+.d-video-label {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:8px;
+  color:var(--text-dim);
+  letter-spacing:3px;
+  text-transform:uppercase;
+  margin-bottom:10px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.d-video-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+.ai-section {
+  border:1px solid var(--border);
+  margin-bottom:28px;
+}
+.ai-section-header {
+  background:var(--text);
+  color:#fff;
+  padding:10px 16px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.ai-btn {
+  background:#fff;
+  color:var(--text);
+  border:none;
+  padding:5px 12px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:opacity .15s;
+}
+.ai-btn:hover { opacity:.8; }
+.ai-btn:disabled { opacity:.4; cursor:not-allowed; }
+.ai-body {
+  padding:16px 20px;
+  font-size:13px;
+  line-height:1.7;
+  color:var(--text-mid);
+  display:none;
+  min-height:60px;
+}
+.ai-body.on { display:block; }
+
+.links-bar {
+  display:flex;
+  gap:1px;
+  background:var(--border);
+  border:1px solid var(--border);
+}
+.link-btn {
+  flex:1;
+  background:var(--surface);
+  text-align:center;
+  padding:10px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  color:var(--text-mid);
+  text-decoration:none;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  transition:background .1s, color .1s;
+  display:block;
+}
+.link-btn:hover { background:var(--text); color:#fff; }
+.link-btn.disabled { opacity:.3; cursor:default; pointer-events:none; }
+
+.dots { display:inline-flex; gap:3px; align-items:center; }
+.dots span { width:4px; height:4px; background:currentColor; border-radius:50%; animation:p 1.2s ease-in-out infinite; }
+.dots span:nth-child(2){animation-delay:.2s;} .dots span:nth-child(3){animation-delay:.4s;}
+@keyframes p{0%,100%{opacity:.3;transform:scale(.8);}50%{opacity:1;transform:scale(1);}}
+
+/* THEME TOGGLE */
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--text-dim);
+  transition: all .15s;
+  flex-shrink: 0;
+}
+.theme-toggle:hover { border-color: var(--text); color: var(--text); }
+
+/* RESPONSIVE */
+@media (max-width: 1100px) {
+  :root { --list-w: 260px; }
+  .topbar-meta { gap: 20px; }
+  .detail-inner { padding: 28px 32px; }
+  .d-headline { font-size: 38px; }
+}
+
+@media (max-width: 860px) {
+  html, body { overflow: auto; }
+  .topbar { grid-template-columns: 1fr; }
+  .topbar-left { border-right: none; border-bottom: 1px solid var(--border); }
+  .topbar-right { padding: 12px 16px; flex-wrap: wrap; gap: 12px; }
+  .score-block { border-left: none; padding-left: 0; border-top: 1px solid var(--border); padding-top: 12px; width: 100%; }
+  .main { grid-template-columns: 1fr; height: auto; }
+  .list-panel { height: auto; max-height: 40vh; }
+  .detail-panel { height: auto; overflow: visible; border-top: 2px solid var(--border2); }
+  .ticker { display: none; }
+  .detail-inner { padding: 20px 18px; }
+  .d-headline { font-size: 32px; }
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 600px) {
+  .topbar-meta { gap: 12px; flex-wrap: wrap; }
+  .meta-val { font-size: 18px; }
+  .logo { font-size: 15px; }
+  .d-headline { font-size: 26px; }
+  .detail-inner { padding: 16px 14px; }
+  :root { --list-w: 100%; }
+  .links-bar { flex-direction: column; gap: 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div style="flex:1">
+      <div class="logo">GYEC <em>2026</em> Intel</div>
+      <div class="logo-sub">Finals · Team 32 · Economists · HCI</div>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" title="Toggle dark/light mode">☀</button>
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-meta">
+      <div class="meta-item">
+        <div class="meta-val blue">59</div>
+        <div class="meta-label">Finalists</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-val red">7</div>
+        <div class="meta-label">High Threat</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-val orange">14</div>
+        <div class="meta-label">Mid Threat</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-val green">37</div>
+        <div class="meta-label">Low Threat</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-val blue">Jun 20</div>
+        <div class="meta-label">Finals Date</div>
+      </div>
+    </div>
+    <div class="score-block">
+      <div>
+        <div class="score-tag">Your Score</div>
+        <div class="score-num">118<span class="score-denom">/150 Prelim</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner" id="ticker"></div>
+</div>
+
+<!-- MAIN SPLIT -->
+<div class="main">
+  <div class="list-panel">
+    <div class="list-search">
+      <input type="text" placeholder="Search teams, countries..." oninput="filterTeams(this.value)">
+    </div>
+    <div class="list-scroll" id="tlist"></div>
+  </div>
+  <div class="detail-panel" id="panel">
+    <div class="empty-state">
+      <div class="empty-title">Select a team</div>
+      <div class="empty-sub">Choose from the list to view intelligence report</div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+const VL={1:"https://youtu.be/pUq2WNoptQQ",2:"https://youtu.be/Y8Sa7BMHM4o",3:"https://youtu.be/qZZgpLFQAH0",5:"https://youtu.be/hgZoom_pr",6:"https://youtu.be/ORigIN_pr",7:"https://youtu.be/Sustainababes_pr",8:"https://youtu.be/YxSXVostCvg",9:"https://youtu.be/vPUxMnJxpuY",14:"https://youtu.be/sIzIRQj-xcU",18:"https://youtu.be/xkduM1ejV48",20:"https://youtu.be/ALxXQTmPP_Q",22:"https://youtu.be/3ayre0MRGnE",23:"https://youtu.be/N4YmswPRcdY",24:"https://youtu.be/Lrpb5lqPyzg",26:"https://youtu.be/fbs3XH5QGPs",29:"https://youtu.be/YI-nfMMiJ0o",32:"https://youtu.be/txV-sY8vHuw",41:"https://youtu.be/89zS6rCQwOI",42:"https://youtu.be/outDDKgS9t0",43:"https://youtu.be/psN-w2hS9RI",45:"https://youtu.be/sDHspKtsWoQ",46:"https://youtu.be/UtNtrLJ1vnk",47:"https://youtu.be/r1eO2-HaURU",51:"https://youtu.be/rpS7ZSoA_NM",53:"https://youtu.be/KrQyEfv9N-k",58:"https://youtu.be/H9oLAGJqpW4",60:"https://youtu.be/nMB4MG_NKsw",61:"https://youtu.be/fZVppCOv7MU",65:"https://youtu.be/F1kOPxavEMM",74:"https://youtu.be/szp5eNflihQ",77:"https://youtu.be/dq3GgMZ0rp0",79:"https://youtu.be/bb_onGm02lE",81:"https://youtu.be/LFs3SJAzg7c",84:"https://youtu.be/UNDcaQlSuyY",85:"https://youtu.be/qQC6iXtZsdQ",86:"https://youtu.be/ZqtAS6TKPYI",87:"https://youtu.be/UtNtrLJ1vnk",88:"https://youtu.be/r1eO2-HaURU",89:"https://youtube.com/shorts/pXwfIfT9Y7s",90:"https://youtu.be/wrYiHa3D-X8",91:"https://youtu.be/UNMteRVEgWw",92:"https://youtu.be/c9UmU_RwcMI",93:"https://youtu.be/n4vYEEt06A0",96:"https://youtu.be/A-BN1SH4e1o",97:"https://youtu.be/NllJpKumVnI",98:"https://youtu.be/hn822J8aFZM",99:"https://youtu.be/cZBrLgqydNg",100:"https://youtu.be/Q9CB79HTn6I",101:"https://youtu.be/mOYuhZFUD5c",103:"https://youtu.be/f45X4g0ja54",105:"https://youtu.be/HzRGymKtSZw",106:"https://youtu.be/RGhM2bWo-6U",107:"https://youtu.be/sNaDNUdjOK4",108:"https://youtu.be/4aI3DHENIXQ",110:"https://youtu.be/bE_L3soFOwo",113:"https://youtu.be/Lv8C8gJH7fg",149:"https://youtu.be/NKf4oFQJBtA",158:"https://youtu.be/-QAAMM17B1E",163:"https://youtu.be/yJSYfqZGK1U"};
+
+const TEAMS=[
+{num:32,name:"Economists",country:"Singapore",school:"Hwa Chong Institution",threat:"you",score:118,
+idea:"MycoShield — flat-pack disaster housing kit. Survivors build a permanent insulated home in 3 days using local disaster rubble + factory-grown mycelium panels + geopolymer activator. Five-layer wall: geopolymer / mycelium / geopolymer core / mycelium / geopolymer. $300 COGS, $450 sell, 33% margin. Solar jaw crusher processes rubble on-site.",
+strengths:["Only team combining mycelium + geopolymer — genuinely novel bio-chemical fusion","Strong competitive table vs UNHCR tent ($1,270) and pre-fab containers ($3,000+)","5-year financial projections with sourced cost breakdown","Clear 4-step deployment process"],
+weaknesses:["Technical claims lack cited evidence (fire rating, structural safety, waterproofing)","Only TAM shown — no SAM/SOM breakdown","Logistics gap: rubble movement, manpower, solar crusher capacity not detailed","Prototype persuasiveness lowest judge score (10/15)"],
+verdict:"YOUR TEAM. Finals is a completely new problem — MycoShield doesn't carry over. Use 2 weeks to sharpen process speed, citation quality, 3D modelling, and video production.",
+video_notes:"Prelim video scored 36/45 Communication. Judges praised physical model but flagged prototype persuasiveness as lowest individual score. Inspiration story and tech explanation need to hit harder. Plan drone + DaVinci Resolve production for finals.",
+tags:["housing","biomaterials","geopolymer","mycelium","disaster relief"]},
+
+{num:26,name:"LockedIn",country:"Singapore",school:"Raffles Institution",threat:"high",
+idea:"ReFrame — AI-powered disaster building assessment ecosystem. Offline TensorFlow Lite scanner app (RGB + LiDAR + thermal) classifies buildings Green/Amber/Red in 30-45 min (vs days manually). Engineering panel reviews AI recommendations remotely. Government dashboard tracks every building by priority queue. Piezoelectric structural sensors monitor repaired buildings permanently.",
+strengths:["15+ citations — strongest citation depth of all teams","Sharp stats: 2.197M buildings post-Turkey, 30-40% unnecessarily demolished, 15-20% false-negative rate in current methods","15:1 net benefit ratio — extremely persuasive financial argument","B2G: government procurement mandates adoption, no direct sales needed","3-phase market strategy: Philippines/NZ → OCHA → conflict zones"],
+weaknesses:["Platform requires internet for full sync — offline mode still needs connectivity eventually","Engineering panel could bottleneck at massive scale","Sensor deployment only useful post-rebuild — no immediate disaster utility"],
+verdict:"Most dangerous competitor from Singapore. Writing quality, citation depth, and financial framing are best-in-class. This is your benchmark — every section of your business plan should aim to match their rigour.",
+video_notes:"Expect clean face-to-camera explanation with app UI demo, engineering dashboard walkthrough, and sensor installation footage. Their 3-component product structure gives natural video pacing. Watch how they simplify a complex tech stack into a clear story.",
+tags:["AI","structural assessment","B2G","platform","disaster recovery"]},
+
+{num:9,name:"Band-Aid",country:"South Korea",school:"KIS Pangyo",threat:"high",
+idea:"SafeReturn Fibre — distributed fibre optic sensing (DFOS) for post-disaster structural triage. Adhesive DFOS cables attached to columns/beams in 1-2 hrs. Rayleigh-Brillouin backscattering detects microfractures. AI classifies Green/Yellow/Red/Black. $399–$4,999 per assessment vs $1,000–$2,000 for manual engineers.",
+strengths:["TAM/SAM/SOM all three: $741M/$259M/$4.4M Year 1 — most complete market sizing reviewed","Best 5-year P&L detail of any team: COGS 40%, OpEx breakdown, break-even Year 2","DFOS technology is commercially proven in bridges, tunnels, dams","Clear competitive comparison vs AECOM/ARUP/Kinemetrics"],
+weaknesses:["Adhesive tape DFOS adaptation vs permanent burial — unproven at scale in disaster conditions","US-only market initially — geographically narrow","No prototype shown in BP"],
+verdict:"Technically sophisticated with the best financial model reviewed. Their TAM/SAM/SOM structure is exactly what your business plan needs. Study their financial section closely.",
+video_notes:"DFOS cables, interrogator units, and Green/Yellow/Red/Black risk classification are visually compelling. Expect clean data visualization. Watch how they explain a technically complex sensing mechanism simply — key communication skill for finals.",
+tags:["fibre optic","structural sensing","AI triage","disaster recovery","B2B"]},
+
+{num:8,name:"AIVisionaries",country:"South Korea",school:"Yongsan International School Seoul",threat:"high",
+idea:"PhoenixSoil — Mobile self-cycling pyrolysis trucks. Wildfire debris heated 450-550°C in oxygen-starved chamber → biochar + syngas. Syngas loops back to fuel reactor (autothermal). Biochar used for erosion control, soil restoration, reforestation. Three revenue streams: debris contracts (~€55/tonne), biochar sales (~€230/tonne), carbon credits (~€120-280/tonne CO₂). Single unit: €580K revenue, €270K opex, payback 2 years.",
+strengths:["Autothermal design — self-sustaining, no external fuel","Three revenue streams reduces concentration risk","Carbon credit angle is financially credible and innovative","Specific pilot geography (Greece Peloponnese) makes market entry very concrete","Science well-cited with pyrolysis chemistry sources"],
+weaknesses:["Greece-only initially — geographically narrow","Wildfire-specific, not general disaster","€420K unit cost is high capital requirement","Break-even Year 4 company-wide"],
+verdict:"Different problem space (farmland restoration vs housing) so not direct competition. Their revenue model sophistication and scientific credibility are benchmarks. Three revenue streams = something to consider for your own model.",
+video_notes:"Mobile pyrolysis trucks and biochar soil restoration are visually dramatic. Before/after farmland shots would be compelling. Their carbon credit revenue story gives strong financial narrative hook. Watch how they explain autothermal chemistry without losing non-technical judges.",
+tags:["pyrolysis","biochar","carbon credits","wildfire","agriculture","Greece"]},
+
+{num:96,name:"DeMaGlorglons",country:"Russia",school:"Letovo School",threat:"high",
+idea:"FLOODGUARD — Autonomous disaster-response drone: ground-penetrating radar for pre-collapse prediction, UWB radar detecting breathing + heartbeat through concrete, LiDAR 3D debris mapping, thermal survivor detection, Iridium/Starlink satellite comms. Proactive: predicts landslides/collapses before disaster. SLA maintenance contracts as primary recurring revenue (65% gross margin). Break-even Year 5, SLA base of 103 kits generating $3.09M recurring from Year 6.",
+strengths:["Most technically ambitious idea in the competition","Proactive prevention (predicts before disaster) is genuinely differentiated","SLA model: revenue compounds with installed base independently of new hardware sales","UWB through-rubble vitals detection is highly innovative","Powerful Dagestan disaster emotional backstory"],
+weaknesses:["Hardware cost not specified — likely very high","Break-even Year 5 is late","Regulatory approval for autonomous disaster drones is complex","Heavily government procurement-dependent"],
+verdict:"Letovo is one of Russia's top academic institutions. Different problem space (rescue vs housing) so not direct competition, but their SLA recurring revenue model and proactive prevention angle are the most sophisticated business concepts in the competition.",
+video_notes:"Drone footage of disaster zones would be cinematic. UWB through-rubble detection and thermal survivor imaging are visually dramatic. Dagestan backstory gives them a powerful emotional opening. Watch how they balance technical complexity with emotional storytelling.",
+tags:["drone","AI","UWB radar","flood response","SLA","recurring revenue"]},
+
+{num:41,name:"MidnightUnicorn",country:"Taiwan",school:"Taipei Fuhsing / Kaohsiung Senior HS",threat:"high",
+idea:"Harbor — PTSD wearable vest for disaster survivors. Biosensors (HRV, EDA, GSR, respiration, skin temp) detect hyperarousal. Endothermic water-urea cartridge delivers cooling cue. Companion app plays soothing audio + breathing exercises. $82.95 COGS, $137 sell, 39.5% gross margin. Recurring revenue from $15 cooling refill packs. 20+ citations.",
+strengths:["Completely differentiated — mental health angle, no other team in this space","Hardware + consumables recurring revenue model","20+ citations — most thorough research of any team","Clear pain points: cost, accessibility, effectiveness vs Apollo Neuro","Strong SDG 3 and 8 alignment"],
+weaknesses:["Consumer product in a B2G competition — harder institutional scaling","Vest manufacturing complexity at affordable price point","Effectiveness hard to validate in 12 hours","PTSD treatment requires clinical evidence judges may scrutinise"],
+verdict:"Tackles disaster aftermath (mental health) rather than physical shelter — unique angle. Strong recurring revenue model. One of the most well-researched plans in the competition.",
+video_notes:"Wearable vest is a filmable physical prototype. Biosensor data visualization and app demo would look polished. PTSD panic attack scenario is emotionally powerful for video. Cooling cartridge activation is a clear demonstrable mechanism — watch their prototype demo.",
+tags:["PTSD","wearable","mental health","hardware+consumables","recurring revenue"]},
+
+{num:163,name:"DRiVVe",country:"USA (CA)",school:"Santa Clara High School",threat:"high",
+idea:"Stratum — Two containerized units deployed to any disaster site within 72 hours. Unit 1: debris mill (crusher + concrete mixer) processes rubble into printable geopolymer mix embedded with Shewanella oneidensis bacteria. Unit 2: 3D concrete printer builds homes on-site. The walls store electricity like a biological battery — Shewanella generates electricity as it matures, recharged biologically via annual maintenance. Walls improve over time.",
+strengths:["Bio-battery walls using Shewanella oneidensis is the most scientifically creative idea in the competition","Geopolymer + bacteria combination directly overlaps your materials space — judges will compare","Self-powering homes addresses energy poverty simultaneously with housing","72-hour deployment is very fast","The disaster becomes both the raw material AND the energy grid — extremely compelling narrative"],
+weaknesses:["Shewanella oneidensis electricity generation at structural scale is highly experimental","No financial projections visible in BP","Bacterial concrete at disaster-zone scale has significant quality control challenges","Annual biological maintenance in disaster zones is operationally complex"],
+verdict:"HIGH THREAT. Directly overlaps with your geopolymer territory and takes it further with bio-battery walls. Judges who saw MycoShield will compare these two directly. You need to clearly differentiate why mycelium insulation + geopolymer structure beats bacteria-embedded geopolymer.",
+video_notes:"Bio-battery walls that glow or power lights would be visually spectacular if they can demonstrate it. Debris-to-home pipeline is a compelling visual narrative. Santa Clara HS likely has strong production resources. Watch their prototype — if they show working Shewanella electricity generation it will be very impressive.",
+tags:["3D printing","geopolymer","bio-battery","Shewanella","disaster housing","energy"]},
+
+{num:106,name:"TUNAS",country:"UK (England)",school:"Tonbridge School",threat:"mid",
+idea:"CarbonCore — Mobile rubble-processing trailer converting disaster debris into structural blocks via accelerated mineral carbonation. No Portland cement. Crushed rubble + quicklime cured in ambient air. CO₂ + CaO → CaCO₃ (carbon-negative). 4,000 bricks/day. £0.11 variable cost, £0.45 market value. Three revenue streams: emergency leasing, carbon credits, community ownership transition.",
+strengths:["Carbon-negative process is strong differentiator","No Portland cement = no supply chain dependency","Contamination control well addressed (BaCl₂ sulfate test, wet-density separation, log-washer)","Community ownership transition model is socially compelling","Carbon credit secondary revenue stream"],
+weaknesses:["2-4 week ambient carbonation curing is slow for emergency response","Bricks only — not a complete housing system like MycoShield or Stratum","Quicklime supply chain dependency"],
+verdict:"Closest competitor to MycoShield's rubble-upcycling concept but makes bricks not homes. Your integrated housing system is more complete. Their contamination control section is something you should address in your own revision.",
+video_notes:"Carbonation reaction (CaO + CO₂ → CaCO₃) is elegant and could be shown as animation or chemistry demo. Mobile trailer is a clear prototype concept. Carbon-negative messaging is a strong visual hook.",
+tags:["carbonation","rubble recycling","carbon credits","bricks","carbon-negative"]},
+
+{num:101,name:"Unquotables",country:"Germany",school:"Frankfurt International School",threat:"mid",
+idea:"Project Phoenix — 3-unit mobile system: debris processor + concrete mixer + XYZ-gantry 3D printer. Converts local disaster rubble into 3D printed houses. 90m² home in 18-30 hrs, 3-4 operators. Free CAD catalogue for customization. €300M cash inflows projected over 4 years.",
+strengths:["3D printing from rubble is highly visual for video","Customization via free CAD catalogue addresses survivor dignity","Three-unit mobile system is operationally credible","Large market size references"],
+weaknesses:["€300M inflow projection seems wildly aggressive and potentially undermines credibility","Marketing via TikTok and celebrity endorsements is wrong for B2G target","Overlaps significantly with Team 43 Synapse — less differentiated"],
+verdict:"Strong concept but financial projections damage credibility. Marketing strategy mismatch with B2G target is a red flag judges will catch. Beatable on financial rigour.",
+video_notes:"3D gantry printing a house is the most cinematic prototype footage in the competition if executed. Frankfurt IS likely has strong production resources. Watch for production quality — could be very high.",
+tags:["3D printing","rubble recycling","disaster housing","mobile manufacturing","customization"]},
+
+{num:43,name:"Synapse",country:"Taiwan",school:"Taipei American School",threat:"mid",
+idea:"ReHome3D — Recycling + Remote Customization + Reconstruction using COBOD 3D printing. Debris converted to printable filament. Residents customize via UI. $1.44M initial investment. Break-even Year 2. Saves ~$1,000/m³ vs traditional construction.",
+strengths:["COBOD is a real commercially proven 3D printing system","Customization UI addresses psychological dignity of survivors","Good cost comparison vs traditional construction","Taipei American School likely has strong English communication skills"],
+weaknesses:["Heavy COBOD third-party dependency","Large initial investment","Significantly overlaps Team 101 — both doing disaster debris 3D printing","Less financially detailed than Team 9"],
+verdict:"Solid but overlaps with Frankfurt's Project Phoenix. Both doing disaster debris 3D printing without enough differentiation between them.",
+video_notes:"COBOD printing is visually impressive. Personal Hualien earthquake connection gives strong emotional hook. Watch their explanation of debris-to-filament conversion.",
+tags:["3D printing","COBOD","disaster housing","customization","Taiwan"]},
+
+{num:26,name:"LockedIn",country:"Singapore",school:"Raffles Institution",threat:"high"},
+
+{num:85,name:"Lumina",country:"Pakistan",school:"LGS Phase V",threat:"mid",
+idea:"Sanad — Field-deployable biometric system restoring legal identity within 72 hours post-disaster. Fingerprint + iris + face matching against pre-registered database. Aid delivery verified via biometric sign-off eliminating fraud and diversion. Reunites separated families. Operates offline in field, syncs when connectivity found.",
+strengths:["Addresses critical and underserved problem: 850M-1B people globally lack legal ID","Strong Pakistan context gives authentic motivation","Biometric verification of aid delivery is genuinely novel","Offline-first design is operationally credible for disaster zones","Well-cited pain points with World Bank ID4D data"],
+weaknesses:["Privacy and data sovereignty concerns in authoritarian or conflict contexts","Biometric database pre-registration requires buy-in before disaster — chicken-and-egg","Government procurement in fragile states is slow and uncertain"],
+verdict:"Tackles identity recovery — an often-ignored disaster problem. Genuinely differentiated from housing and comms teams. Strong plan with real-world Pakistani disaster context.",
+video_notes:"Biometric scanning demo (fingerprint + iris) is filmable and technically impressive. Family reunification scenario is emotionally powerful. Watch their explanation of offline-first architecture.",
+tags:["biometrics","identity recovery","disaster relief","B2G","offline"]},
+
+{num:86,name:"Quant",country:"Pakistan",school:"Lahore Grammar School",threat:"low",
+idea:"RELINK — Identity recovery and employment platform for disaster survivors. Encrypted database + AI software expedites identity verification. Partners with local governments so survivors can reconstruct documents and access employment post-disaster.",
+strengths:["Addresses same underserved identity gap as Sanad","Employment platform angle is additional differentiation","B2G + B2B dual model"],
+weaknesses:["Less technically detailed than Sanad — no biometric specifics","Very similar concept to Team 85 without clear differentiation","Citation quality appears weaker"],
+verdict:"Overlaps with Sanad (Team 85) but less technically developed. Sanad is the stronger version of this concept.",
+video_notes:"Identity recovery narrative is emotionally compelling but without strong technical demo the video may feel generic.",
+tags:["identity recovery","employment","disaster relief","B2G"]},
+
+{num:1,name:"Spendwise",country:"New Zealand",school:"New Plymouth Boys' HS",threat:"mid",
+idea:"CANOPY — Portable disaster comms kit. Helium balloon relay units (LoRa/WiFi/GPS/solar), survivor beacons (3-sec press = I am here), CANOPY OS command case (offline maps, satellite uplink, live rescue points). Creates temporary digital infrastructure when cell towers fail.",
+strengths:["Survivor-initiated beacon is strong human-centred innovation","Offline-first design critical for disaster zones","Three-component system gives natural video structure","Clear use case: Iran 2026 internet blackout, Christchurch, Kaikōura"],
+weaknesses:["Helium supply in disaster zones not addressed","LoRaWAN range may need many balloon units for large disasters","One-use beacons — resupply logistics not addressed"],
+verdict:"Creative well-presented concept. Not in housing space so not direct competition. Survivor-empowerment angle (beacon as agency) is something to note for your own narrative framing.",
+video_notes:"Balloon relay units, orange survivor beacons and command case are all highly filmable props. The 'I am here' beacon activation is an emotionally powerful camera moment.",
+tags:["communications","LoRa","balloon relay","survivor location","offline"]},
+
+{num:3,name:"ThinkTank",country:"Australia",school:"SCECGS Redlands",threat:"low",
+idea:"ReCrete — Disaster recovery company converting rubble into recycled concrete aggregate. Four revenue tiers: rubble clearance ($20-40/tonne), recycled aggregate sales ($35-45/tonne), plant leasing ($30k-90k/month), carbon credits ($20k-110k per 50k tonne project).",
+strengths:["Four revenue tiers is a diversified model","Carbon credit tier is credible","Simple operational model — adapts existing machinery"],
+weaknesses:["No financial projections","Generic idea — rubble recycling is not novel","Minimal citations","No prototype described"],
+verdict:"Thin execution. Four revenue tiers is their strongest element but no numbers back it up. Easy to outscore.",
+video_notes:"Rubble processing machinery is industrial but not visually exciting without strong narrative. Weak on citations — likely shows in video explanation confidence.",
+tags:["rubble recycling","aggregate","carbon credits","disaster recovery"]},
+
+{num:29,name:"fratresunum",country:"Singapore",school:"St. Joseph's Institution",threat:"mid",
+idea:"TUMBUH — Modular bamboo-framed tiny homes on wheels. Pre-built modular parts stored in regional SEA hubs, towed directly to affected areas. Minimal on-site construction. Rooftop solar panels. Wheel-based chassis allows relocation from flood-prone areas.",
+strengths:["Regional hub distribution model is operationally smart","Bamboo abundant and sustainable in SEA","Mobility (wheels) is a genuine differentiator — homes can relocate","Targets Japan + SEA disaster context"],
+weaknesses:["Very thin financials — cost breakdown not detailed","Only 3 citations — weakest Singapore team","Bamboo structural performance not cited","No 3D prototype detail"],
+verdict:"Weakest of three Singapore teams. Interesting concept but execution is thin. You should outscore this on every criterion.",
+video_notes:"Bamboo tiny home on wheels is a filmable physical prototype — their strongest asset. Modular assembly could be demonstrated live. Watch whether they show real structural data or just describe the concept.",
+tags:["bamboo","modular housing","disaster relief","SEA","mobile homes"]},
+
+{num:14,name:"Mugunghwa",country:"South Korea",school:"Seoul Global High School",threat:"mid",
+idea:"GrowBack Bus — Solar-powered mobile agricultural recovery platform. Functions as mobile nursery, soil-testing lab, AI-assisted crop recommendation centre. Hydroponic germination systems grow region-appropriate crops. Pre-diagnosis via online platform before deployment.",
+strengths:["Unique agricultural recovery focus — different from all housing/comms teams","AI soil analysis + crop recommendation is technically credible","Mobile platform model is operationally flexible","Hydroponic germination is well-suited for disaster soil damage"],
+weaknesses:["Target market (agricultural communities) is narrower than general disaster response","Scaling across different regional crops is complex","No financial projections visible"],
+verdict:"Differentiated agricultural focus. Not competing with housing teams. Interesting concept but financial depth unclear.",
+video_notes:"Mobile nursery with growing crops is visually distinctive. AI soil analysis could be demonstrated with device mockup. Agricultural before/after recovery is compelling.",
+tags:["agriculture","hydroponics","AI","mobile platform","food security"]},
+
+{num:18,name:"Jutsi",country:"China",school:"German Swiss International School",threat:"mid",
+idea:"Jutsi — On-site closed-loop system repurposing disaster debris and organic waste into water, energy and food. CNN-powered debris sorting (96% accuracy) categorises concrete, hazmat, metals, timber. Concrete → structural material, organic → biogas energy, organic → hydroponic food. Targets LICs: Bangladesh, Haiti, Syria, Mozambique, Philippines.",
+strengths:["Closed-loop system addressing water + energy + food simultaneously is highly ambitious","CNN debris sorting at 96% accuracy is technically impressive claim","Targets LICs where need is greatest","German Swiss IS likely has strong English and production quality"],
+weaknesses:["Extremely complex system — three outputs from one platform is hard to execute in 12 hours","CNN accuracy claim needs strong citation","Operational feasibility of closed-loop in disaster zone is questionable","No financial projections visible in excerpt"],
+verdict:"Highly ambitious multi-output system. If well-executed this could score very high on creativity. Watch for over-complexity critique from judges.",
+video_notes:"Three simultaneous outputs (water/energy/food) from disaster debris is a visually compelling narrative. CNN sorting demo would be impressive. German Swiss IS likely produces high quality video.",
+tags:["closed-loop","debris sorting","CNN","energy","food","water","LIC"]},
+
+{num:20,name:"Moggers",country:"Malaysia",school:"Han Chiang High School",threat:"low",
+idea:"Riedy — Permanent shared disaster-resilient kit housing targeting Japan's multi-stage emergency housing pipeline. Addresses gap between evacuation centres, temporary prefab units, and permanent housing. Smart tech ecosystem integration.",
+strengths:["Japan-specific focus is highly relevant given GYEC's Japanese organizers","Addresses the specific 3-phase Japanese housing pipeline thoughtfully","Smart ecosystem angle is modern"],
+weaknesses:["Kit housing concept not technically detailed","No financial projections visible","Han Chiang High School — less established international competition track record"],
+verdict:"Japan-focused housing concept that judges may appreciate culturally. Lack of technical and financial detail is the weakness.",
+video_notes:"Japan disaster housing context is relatable for Japanese judges. Smart ecosystem visual could be compelling if well-produced.",
+tags:["housing","Japan","disaster recovery","kit housing","smart tech"]},
+
+{num:22,name:"Zen",country:"Mongolia",school:"New Beginning International School",threat:"mid",
+idea:"Zen Housing — Recycled geopolymer 3D printing from disaster rubble. Prints homes in 15 hours. Hires disaster survivors as paid workers. Delivers to governments or UN. Geopolymerisation converts silica/alumina rubble (roof tiles, ceramics, ferrous slag) into printable material.",
+strengths:["Geopolymer 3D printing directly overlaps your MycoShield materials — judges will compare","Survivor employment angle is socially compelling","15-hour print time is fast","Mongolia perspective is unique"],
+weaknesses:["No financial projections","Geopolymer rubble quality consistency not addressed","Mongolia team likely has less production resources for video"],
+verdict:"Mid threat — geopolymer territory overlaps with MycoShield. But without mycelium insulation their product is structurally simpler. Your 5-layer wall system has more technical depth.",
+video_notes:"3D printing footage is always visually impressive. Survivor worker angle gives emotional depth. Watch production quality — Mongolian team may have more limited resources.",
+tags:["geopolymer","3D printing","rubble recycling","disaster housing","survivor employment"]},
+
+{num:23,name:"Infinity",country:"Mongolia",school:"MNUMS affiliated schools",threat:"low",
+idea:"Homely — Smart ger (Mongolian yurt) combining traditional resilience with modern tech. Polyethylene and fibreglass structure assembled in 1 hour. Active climate control. Independent solar electricity generation. Targets NGOs and governments as institutional buyers.",
+strengths:["Traditional + modern fusion is culturally distinctive and memorable","1-hour assembly by anyone (no tools) is genuinely impressive","Active climate control differentiates from passive tents","Authentic Mongolian heritage gives strong storytelling angle"],
+weaknesses:["Ger/yurt form factor limits interior space and layout","Technology integration details sparse","Multi-school team may face coordination challenges"],
+verdict:"Culturally distinctive idea with authentic Mongolian storytelling. Not directly competing with housing reconstruction teams. Memorable concept that judges may remember.",
+video_notes:"Traditional Mongolian ger assembly would be visually beautiful — authentic cultural content stands out. Solar-powered active climate control demo is filmable.",
+tags:["ger","yurt","Mongolia","modular shelter","solar","traditional+modern"]},
+
+{num:24,name:"MaterDebaters",country:"Philippines",school:"International School Manila",threat:"mid",
+idea:"ARIADNE — NGO + Government platform for missing persons post-disaster. Face-matching + DNA analysis + document parsing with calibrated uncertainty intervals. Every artifact hashed, signed, chain-of-custody logged per Berkeley Protocol (OHCHR 2022). Neutral platform layer — individuals, NGOs and governments coordinate without surrendering data sovereignty.",
+strengths:["Deeply personal origin story (Jacques Lee's Korean War grandfather) — emotionally powerful","Berkeley Protocol forensic-grade evidence is technically credible","Data sovereignty neutral-platform approach is sophisticated","Missing persons is critically underserved in disaster response"],
+weaknesses:["DNA analysis at scale in disaster zones is logistically complex","Platform requires prior registration or existing data to match against","Revenue model not detailed in excerpt"],
+verdict:"Emotionally powerful and technically credible. Tackles missing persons — completely unique problem space. Forensic-grade data handling is sophisticated. ISM team likely has strong English communication.",
+video_notes:"Jacques Lee's grandfather backstory is one of the most powerful emotional opening hooks in the competition. DNA matching visualization and Berkeley Protocol compliance could be presented cleanly. ISM likely produces polished video.",
+tags:["missing persons","biometrics","DNA","forensic","platform","disaster recovery"]},
+
+{num:42,name:"PhaseOne",country:"Taiwan",school:"Asia American International Academy",threat:"low",
+idea:"SolaceAir — AI-powered multisensory recovery device for disaster shelters. Safe scent diffusion, calming sound, soft visual guidance, air-quality sensing. Based on olfactory emotional memory science (odor-cued memories 30% more emotional than word-cued). Transforms survival shelters into emotional recovery spaces.",
+strengths:["Completely unique sensory approach to disaster recovery","Strong neuroscience foundation (amygdala/hippocampus/olfactory memory connection)","Addresses emotional recovery — ignored by all other teams","Low-tech, low-cost device concept"],
+weaknesses:["Scent diffusion effectiveness in large shared shelters is questionable","Emotional benefit hard to quantify for judges expecting financial metrics","Device cost and manufacturing not detailed"],
+verdict:"Creative and unique but niche. Emotional recovery angle is genuinely differentiated. Low financial detail may hurt scores.",
+video_notes:"Multisensory device demo with scent and calming audio would be unusual and memorable. The neuroscience explanation needs to be simple and visual.",
+tags:["sensory","emotional recovery","PTSD","shelter","scent","AI"]},
+
+{num:51,name:"Mayongchid",country:"Thailand",school:"International Community School Bangkok",threat:"low",
+idea:"Re:Link — Solar-powered mesh networking communication system. Offline mesh network connects survivors without internet. GPS, mobile app, drone deployment. Safety updates, aid requests, resource location, recovery coordination. Combines solar energy, mesh networking, GPS, mobile app and drones.",
+strengths:["Solar-powered offline mesh is operationally credible","Drone deployment extends coverage","Emotional support + community rebuilding angle beyond just comms"],
+weaknesses:["Overlaps significantly with CANOPY (Team 1) and EchoWatch (Team 53)","Less technically differentiated than competitors in same space","ICS Bangkok — production quality unknown"],
+verdict:"Three teams doing disaster comms (CANOPY, EchoWatch, Re:Link) — this is the least differentiated of the three.",
+video_notes:"Drone mesh network deployment footage would be visually interesting. Community coordination scenario is filmable.",
+tags:["mesh networking","solar","drone","disaster comms","offline"]},
+
+{num:53,name:"Inwentors",country:"Thailand",school:"International School Bangkok",threat:"mid",
+idea:"EchoWatch — Standalone smartwatch for off-grid disaster communication. Mesh networking links nearby devices. TAM $151B (global emergency response), SAM $37B (off-grid comms), SOM $4.2M. Hardware-only B2G model targeting defense ministries and emergency management departments.",
+strengths:["TAM/SAM/SOM properly broken down — good market sizing discipline","Wearable form factor is always-on unlike portable devices","95% cell site failure statistic is compelling","ISB likely has strong production quality"],
+weaknesses:["Mesh network range without infrastructure is limited","Battery life on emergency-mode mesh networking is a real constraint","Three Thailand comms teams competing in same space"],
+verdict:"Better market sizing than Re:Link. ISB has historically strong teams. Wearable angle differentiates from balloon/ground-based comms solutions.",
+video_notes:"Smartwatch is a clean filmable prototype. Mesh network visualization graphic would help explain the technology. ISB typically produces polished video — watch production quality.",
+tags:["smartwatch","mesh networking","wearable","B2G","disaster comms","off-grid"]},
+
+{num:60,name:"Artemis",country:"Vietnam",school:"Lawrence S. Ting School",threat:"low",
+idea:"RecoveraTM — Subscription-based disaster recovery service. Users register for different support tiers BEFORE emergencies. AI-based recovery assessment, shelter allocation, SMS coordination. Targets working-class families aged 25-55 in typhoon/flood-prone Vietnam. B2C subscription model.",
+strengths:["Pre-disaster subscription model is innovative — users enrolled before crisis","AI-based shelter allocation is operationally smart","Vietnam-specific context is authentic"],
+weaknesses:["B2C subscription for low-income disaster-prone families faces affordability challenge","Pre-registration requires sustained engagement before disaster occurs","Financial projections not detailed in excerpt"],
+verdict:"Interesting pre-disaster subscription concept but B2C affordability in low-income Vietnamese market is a real challenge judges will probe.",
+video_notes:"Pre-disaster subscription activation → post-disaster deployment story arc is compelling for video. Vietnam disaster footage would be emotionally resonant.",
+tags:["subscription","disaster recovery","B2C","Vietnam","AI","shelter allocation"]},
+
+{num:61,name:"Bee Bee",country:"Vietnam",school:"VNUHCM High School for the Gifted",threat:"low",
+idea:"Terra Spray — High-efficiency rapid-response bio-remediation mist eliminating toxic pathogens and stabilising soil composition post-disaster. No heavy machinery. Targeted at agricultural soil recovery after disasters/conflicts. Addresses salinity, heavy metals, pH imbalance, microbial loss.",
+strengths:["Bio-remediation spray is a unique low-tech delivery mechanism","Addresses soil toxicity — genuinely underserved problem","No heavy machinery requirement is operationally flexible","FAO data cited for global soil salinity context"],
+weaknesses:["Effectiveness of mist delivery for heavy metal contamination is scientifically questionable","No financial projections","Regulatory approval for bio-remediation agents varies by country"],
+verdict:"Interesting agricultural recovery concept. Different problem space from housing. Bio-remediation spray mechanism is novel but scientific credibility of mist delivery needs strengthening.",
+video_notes:"Spray application demo would be visually satisfying. Before/after soil restoration is a compelling visual. Agricultural recovery in Vietnam disaster context is emotionally resonant.",
+tags:["bio-remediation","soil recovery","agriculture","spray","disaster","Vietnam"]},
+
+{num:65,name:"Habibisigmababi",country:"Vietnam",school:"Williamstown HS + VNUHCM",threat:"low",
+idea:"Geo-Optimizing Bricks — Cost-effective bricks from geopolymerisation. Uses soil and disaster rubble. ~5,000 VND/brick (~$0.19 sell), ~2,105 VND/brick (~$0.08 cost). Targets Northwestern Vietnam post-typhoon Yagi reconstruction.",
+strengths:["Very low cost per brick — accessible for low-income communities","Local soil as raw material reduces supply chain dependency","Geopolymerisation science is credible","Typhoon Yagi authentic motivation"],
+weaknesses:["Very narrow geographic target (Northwestern Vietnam)","No large-scale financial projections","Multi-school team coordination may be challenging","Brick only — not a complete housing system"],
+verdict:"Low-cost geopolymer bricks for Vietnam. Very narrow scope but authentic local context. Not a direct competitor to full housing systems.",
+video_notes:"Simple brick production demo would be straightforward to film. Typhoon Yagi disaster footage gives strong opening context.",
+tags:["geopolymer","bricks","Vietnam","rubble","low-cost","typhoon"]},
+
+{num:74,name:"TECHNOTIANS",country:"India",school:"Delhi Public School Greater Faridabad",threat:"low",
+idea:"Safe Rise — Multi-component disaster recovery platform. Smart wearables monitoring survivor health + location. AI-powered solar relief pods providing shelter and RFID-based resource access. Survivor tracking, emergency comms, long-term livelihood recovery solutions.",
+strengths:["Multi-component system addresses immediate rescue + medium-term shelter + long-term livelihood","Personal uncle injury motivation is authentic","RFID resource distribution prevents aid leakage","India earthquake-prone context is credible target market"],
+weaknesses:["Very broad scope — wearables + pods + comms + livelihood in one system is ambitious","Financial detail unclear","Delhi Public School — production quality variable"],
+verdict:"Ambitious multi-component system but breadth may hurt depth. Judges may feel it's trying to do too much.",
+video_notes:"Multiple product components gives natural video structure. RFID resource distribution demo is filmable. Personal uncle injury story is strong opening.",
+tags:["wearable","solar pod","RFID","livelihood","disaster recovery","India"]},
+
+{num:77,name:"Paradigm",country:"India",school:"Indus International School Hyderabad",threat:"mid",
+idea:"HAVN — Deployable emergency housing and recovery system. Layered wall structure: strong outer shell + inner insulated air layer + on-site fill compartment using debris. Deployable by 2 people in under a day. Two sizes with community deployment model (8,500 tents, 20,200 individuals). Targets ASEAN flood/cyclone/earthquake victims.",
+strengths:["Debris-filled wall compartment is innovative structural concept overlapping with your rubble-use angle","2-person under 1-day deployment is genuinely fast","Community cluster deployment model is operationally credible","Indus International — likely high production quality"],
+weaknesses:["Tent framing — is this permanent or temporary? Unclear from excerpt","Financial projections not detailed","ASEAN focus is broad — no specific pilot country named"],
+verdict:"Mid threat — debris-filled walls overlaps with rubble-upcycling concept. Watch their video for technical depth. Indus IS typically has strong production quality.",
+video_notes:"Physical deployment demo with 2 people assembling in under a day would be visually impressive. Debris-fill wall concept is filmable. Indus IS likely produces polished video.",
+tags:["emergency housing","debris","deployable","ASEAN","community deployment"]},
+
+{num:79,name:"TAGZ",country:"India",school:"Sanskriti The Gurukul",threat:"low",
+idea:"VAYU — 20' ISO shipping container converted into solar microgrid + satellite comms node. Deployed within 48 hours. Restores autonomous energy, satellite comms, AI-enabled recovery services. Survivors stay near their land rather than going to centralised refugee camps. India-focused (Wayanad 2024 landslide, Manipur 2023 conflict context).",
+strengths:["Shipping container is a credible, deployable platform","Prevents forced displacement to refugee camps — strong human dignity angle","Solar microgrid + comms in single unit is operationally efficient","Wayanad and Manipur authentic Indian disaster context"],
+weaknesses:["Communication and energy in shipping containers is not novel — existing solutions exist","No financial projections","Gurukul school — production quality unknown"],
+verdict:"Solid concept but not highly differentiated from existing military/humanitarian deployable units. Authentically Indian context.",
+video_notes:"Shipping container deployment is filmable. Solar microgrid powering devices in dark disaster zone is a powerful visual. Indian disaster footage would be emotionally resonant.",
+tags:["solar microgrid","satellite comms","shipping container","India","disaster recovery"]},
+
+{num:81,name:"BAI",country:"Kazakhstan",school:"Nazarbayev Intellectual School Astana IB",threat:"mid",
+idea:"BAI Life — Disaster recovery ecosystem mixing insurance, IoT detectors, modular vertical housing and coordinated recovery services. Indonesian citizens pay affordable insurance pre-disaster to secure modular housing post-disaster. B2G+B2C+B2B triple model. Targets Sumatra, Java coastal areas.",
+strengths:["Insurance pre-funding model is financially innovative — guaranteed revenue before disaster","Triple B2G+B2C+B2B model diversifies revenue","Nazarbayev IS is one of Kazakhstan's top academic institutions — strong team","IoT detector integration is technically credible","Indonesia disaster context is real (290,700 displaced in 2025 Sumatra floods)"],
+weaknesses:["Insurance adoption in low-income Indonesian populations faces accessibility challenge","Triple business model is complex to explain in 2 pages","Modular vertical housing detail sparse"],
+verdict:"Nazarbayev IS is a formidable school. Insurance-funded modular housing is a creative financial model. Watch this team — they may have more depth than the excerpt suggests.",
+video_notes:"Insurance + disaster housing narrative has good story arc (pay now → protected later). Modular vertical housing demo would be visually interesting. Kazakh team presenting about Indonesia may need strong research to be credible.",
+tags:["insurance","modular housing","IoT","B2G+B2C+B2B","Indonesia","Kazakhstan"]},
+
+{num:84,name:"SwishKebab",country:"Kazakhstan",school:"Nazarbayev Intellectual School Astana",threat:"low",
+idea:"SK Group — Fast, affordable, sustainable post-earthquake housing from disaster debris. Targets Southeast Asia (Philippines, Indonesia, Myanmar). Low-income families ($150-450/month) forced into dangerous buildings. Government public-private partnerships for distribution.",
+strengths:["Nazarbayev IS — strong academic institution","Kazakhstan earthquake context gives authentic motivation","Southeast Asia target market is large and relevant","PPP distribution model"],
+weaknesses:["Technical solution not detailed in excerpt — unclear what the housing system actually is","No financial projections visible","Overlaps with multiple housing teams without clear differentiation"],
+verdict:"Nazarbayev IS team but technical solution unclear from BP excerpt. May be stronger than it appears here.",
+video_notes:"Without clear technical system to demonstrate, video may rely heavily on presentation. Watch for what their actual product looks like.",
+tags:["housing","earthquake","Southeast Asia","PPP","low-income"]},
+
+{num:87,name:"DeltaMinds",country:"Armenia",school:"Shirakatsy Lyceum",threat:"low",
+idea:"RESQNET — Three-level disaster comms system. Survivors get smart wristbands with QR codes. Mid-level mesh nodes relay signals. Command centres receive real-time data. Red Cross logged 284,400 missing persons in 2024. Helene left 48.69% of North Carolina cell sites dark.",
+strengths:["Compelling statistics: 284,400 missing in 2024, 48.69% cell sites down after Helene","Three-level architecture (wristband → node → command) is clean and logical","Armenia disaster context is authentic"],
+weaknesses:["Overlaps with CANOPY, EchoWatch, Re:Link — fourth disaster comms team","Wristband differentiation from EchoWatch smartwatch unclear","Financial detail not visible"],
+verdict:"Fourth disaster comms team — the most crowded category in this competition. Needs strong differentiation. Armenia team may face language challenges in video.",
+video_notes:"Three-level architecture could be shown as an animated diagram. Wristband QR code scanning demo is filmable. Watch for English communication quality.",
+tags:["disaster comms","wristband","mesh network","Armenia","missing persons"]},
+
+{num:88,name:"Mathea",country:"Armenia",school:"Physmath school Shahinyan",threat:"low",
+idea:"MATHEA — Post-earthquake housing + personal data protection device. Primary pillar: providing basic shelter (containers) to 600+ people from 1988 Spitak earthquake zone in Armenia where people still live in Soviet wagon-houses. Secondary: IoT location-tracking devices for data protection. Solar-powered, 15-year lifespan.",
+strengths:["1988 Spitak earthquake context — 37 years later people still in wagon-houses is powerful storytelling","Addresses a real ongoing crisis, not hypothetical","Solar-powered 15-year lifespan is sustainable"],
+weaknesses:["Shipping containers as shelter is not novel","IoT data device secondarily connected to housing feels like two separate products","Very narrow geographic focus (Northern Armenia)","Financial detail unclear"],
+verdict:"Powerful historical backstory but limited technical innovation. Narrow scope.",
+video_notes:"1988 earthquake footage/imagery and current wagon-house residents would be emotionally powerful archival content if they can access it. Strong storytelling potential from authentic long-term crisis.",
+tags:["housing","containers","Armenia","earthquake","IoT","data protection"]},
+
+{num:89,name:"Pioneers",country:"Oman",school:"ABA Oman International School",threat:"mid",
+idea:"Systerna — Shipping containers converted into portable off-grid factories deployed into disaster zones within 60-90 days. 5kW solar array, no grid access. Computer vision accelerates operator training to 1-6 weeks. Three production models: ceramic water filters (Type W), hygiene products (Type H), technical goods via 3D printing (Type T). Delivers jobs at $2,200-3,100/job/year vs World Bank's $29,411/job/year.",
+strengths:["$2,200-3,100/job vs World Bank $29,411 — extremely compelling cost comparison","Livelihood creation, not just relief — addresses long-term recovery","Three production types gives flexibility for different disaster contexts","ABA Oman — well-established international school","Off-grid solar factory is operationally credible"],
+weaknesses:["60-90 day deployment is slow for emergency response","Factory products (filters, hygiene, goods) require trained operators","Revenue model not detailed — who pays for the factory deployment?"],
+verdict:"Genuinely innovative livelihood angle — converting containers into factories rather than shelters. $2,200 vs $29,411 per job is a killer comparison that judges will remember. Mid-high threat.",
+video_notes:"Container factory with computer vision training demo would be impressive. The $2,200 vs $29,411 comparison is a perfect video soundbite. ABA Oman likely has strong production resources.",
+tags:["container factory","livelihood","solar","computer vision","disaster recovery","Oman"]},
+
+{num:90,name:"TerraGhaf",country:"UAE",school:"JSS International School Dubai",threat:"low",
+idea:"ARKIVE — NFC-linked identity band + app + responder dashboard. Pre-register records before disaster. NFC scan reunites families, restores documents, enables healthcare/insurance access. 70% of disaster-affected delay aid due to ID loss. GPS survivor location + SOS alerts.",
+strengths:["NFC band is low-cost and wearable","Pre-registration model ensures data exists when needed","JSS International Dubai — strong resources"],
+weaknesses:["Overlaps with Sanad (Team 85) and RELINK (Team 86) — third identity recovery team","NFC range is very short (10cm) — impractical for large-scale survivor scenarios","Pre-registration requires sustained engagement"],
+verdict:"Third identity recovery team. Less technically sophisticated than Sanad. NFC limitation is a real operational concern.",
+video_notes:"NFC wristband scan demo is filmable and simple to show. Dubai school likely has high production quality.",
+tags:["NFC","identity recovery","wristband","disaster relief","UAE"]},
+
+{num:91,name:"Vertex",country:"UAE",school:"Virginia American School / Liwa IS",threat:"low",
+idea:"REBUILDX — Modular autonomous reconstruction shells from recycled ocean plastics + bio-based composite materials. Lightweight structural panels reinforced with advanced fibres and bio-resins. Water-resistant, fire-resistant, earthquake-resistant per FEMA lightweight flexible structure principles. Seismic engineering applied to emergency shelters.",
+strengths:["Ocean plastic upcycling is environmental storytelling gold","Fire + water + seismic resistance triple claim is strong","FEMA reference gives technical credibility","Bio-composite materials are genuinely innovative"],
+weaknesses:["Ocean plastic logistics to disaster zones adds supply chain complexity","Bio-resin structural performance at scale unproven","No financial projections"],
+verdict:"Creative ocean-plastic shelter concept. Environmental storytelling is strong. Technical performance claims need cited evidence.",
+video_notes:"Ocean plastic collection and panel fabrication is visually compelling. Seismic resistance demo (physical model drop test?) would be impressive.",
+tags:["ocean plastic","bio-composite","modular shelter","seismic","UAE"]},
+
+{num:92,name:"DevJam",country:"Kuwait",school:"Indian Educational School Kuwait",threat:"low",
+idea:"PHOENIX — Emergency disaster recovery device + off-grid communication platform. Stores medical history, emergency contacts, ID, rescue info. Initiates emergency comms without internet/towers. Connects survivor to resources needed for recovery.",
+strengths:["Personal data + comms in single device is convenient","Medical history storage is valuable for triage","IES Kuwait — established Indian school"],
+weaknesses:["Similar to multiple comms + identity teams","No financial projections or prototype detail","Concept is relatively generic among disaster comms solutions"],
+verdict:"Generic concept without strong technical differentiation. Likely outscored by more technically specific teams in same space.",
+video_notes:"Device mockup would be straightforward to film. Without unique differentiation the video may feel generic.",
+tags:["emergency device","disaster comms","identity","off-grid","Kuwait"]},
+
+{num:93,name:"Vampreneurs",country:"Romania",school:"American International School Bucharest",threat:"mid",
+idea:"TerraRegen — Trailer system converting organic debris into biochar. 8m long, 4m tall, moves on 4 wheels, controlled from cockpit. Claws pick up large objects. Processes 1-2 tonnes/hour. Biochar restores soil fertility within one growing season vs 3-5 years normally. Pyrolysis at 400-600°C oxygen-limited. Syngas captured to power reactor (closed loop). Water retention +25-45%.",
+strengths:["Self-propelled cockpit-controlled vehicle is highly filmable and memorable","1-2 tonnes/hour processing is a credible throughput claim","Restores soil in 1 growing season vs 3-5 years is a powerful comparison","Carbon storage + soil microbial restoration + water retention cited with data"],
+weaknesses:["Very similar to Team 8 PhoenixSoil (both mobile pyrolysis + biochar + syngas loop)","Agricultural focus, not housing","8m vehicle deployment logistics in disaster zones is complex"],
+verdict:"Similar concept to PhoenixSoil but self-propelled cockpit vehicle is more visually dramatic. AISB typically has strong production resources. Watch for differentiation from Team 8.",
+video_notes:"Self-propelled cockpit-controlled biochar vehicle is the most visually dramatic prototype in the agricultural category. Cockpit control footage would look impressive on camera. AISB likely produces high quality video.",
+tags:["biochar","pyrolysis","mobile vehicle","soil restoration","carbon storage","Romania"]},
+
+{num:98,name:"Sindy",country:"Russia",school:"RZD Lyceum 14 Irkutsk",threat:"low",
+idea:"ReHome — 3D concrete printing from disaster rubble for rapid housing reconstruction. Targets governments, municipalities, humanitarian organizations in disaster-prone regions (SEA, Japan, Turkey, Middle East). 2019 Tulun Russia flood inspiration.",
+strengths:["3D printing housing is well-proven concept","Russia/Tulun authentic disaster context","Targets multiple geographies"],
+weaknesses:["Less technically detailed than Teams 22/43/101/163 doing same concept","RZD Lyceum — less established internationally","No financial projections visible","Most generic of the 3D printing housing teams"],
+verdict:"Fifth team doing disaster debris 3D printing. Least differentiated of the group. Will struggle to stand out against Teams 22, 43, 101, 163.",
+video_notes:"3D printing footage is always visually impressive but without unique differentiation will feel generic compared to competitors.",
+tags:["3D printing","disaster housing","rubble","Russia"]},
+
+{num:99,name:"BeyondAVision",country:"Saudi Arabia",school:"King Faisal Girls School",threat:"mid",
+idea:"ReFlow — Solar-powered autonomous floating units deployed into flood-affected waterways. Collect surface debris, shred and compress onboard into building bricks and panels. Survivors use bricks to rebuild homes free of charge. Simultaneously cleans waterways + provides building materials.",
+strengths:["Waterway floating unit is completely unique — no other team doing this","Dual value: cleans waterways AND provides building materials","Free materials for survivors is compelling social impact narrative","Philippines + SEA flood context is authentic and large market"],
+weaknesses:["Compressed debris bricks from floating waterway debris — quality control is major concern","Free materials model requires external funding source — revenue model unclear","Floating unit deployment and maintenance in flood conditions is operationally complex"],
+verdict:"Genuinely unique concept — floating debris collector + brick manufacturer. Dual-value proposition (clean water + build homes) is compelling. Revenue model is the main gap.",
+video_notes:"Floating unit on floodwater collecting debris is visually spectacular and unlike anything else in the competition. Brick compression demo would be impressive. King Faisal Girls School — watch production quality.",
+tags:["floating unit","waterway","debris collection","bricks","Philippines","solar","flood"]},
+
+{num:100,name:"Seciras",country:"Ukraine",school:"LILA* College",threat:"low",
+idea:"AeroAid Network — AI drone platform. Wave 1: analysis drones (camera + thermal + gas detectors) at 60m, OpenDroneMap photogrammetry stitches 3D damage map in 18 min, AI classifies hazard zones. Wave 2: delivery drones drop first-aid kits with precise GPS coords. Post-emergency: data shared with government for housing/food/doc/financial/psych support.",
+strengths:["Two-wave drone system (assess then deliver) is logically structured","18-minute 3D map generation is a compelling specific claim","OpenDroneMap photogrammetry is a real proven technology","Ukraine context adds geopolitical resonance"],
+weaknesses:["Overlaps with FLOODGUARD (Team 96) in drone disaster response space","Less technically sophisticated than FLOODGUARD's UWB survivor detection","Two-wave coordination logistics not detailed"],
+verdict:"Solid drone disaster response concept but FLOODGUARD is more technically advanced and differentiated (proactive vs reactive). Ukraine context may resonate with international judges.",
+video_notes:"Drone footage from disaster zones is always compelling. 3D damage map visualization is impressive if shown. Ukrainian team's authenticity and current conflict context may create emotional resonance.",
+tags:["drone","AI","photogrammetry","3D mapping","Ukraine","disaster response"]},
+
+{num:103,name:"Catalysts",country:"Botswana",school:"Westwood International School",threat:"low",
+idea:"ReBuild Global — Faster aid delivery platform addressing immediate relief and long-term recovery. Three customer tiers: traditional disaster relief users, underserved rural/transport communities, remote communities excluded from recovery systems. Connects them to aid, jobs, insurance, global trade. Website + call centres.",
+strengths:["Three-tier market segmentation is comprehensive","Africa-specific context is authentic and underrepresented","Truck driver/transport integration for empty return trips is creative"],
+weaknesses:["Platform concept is vague — unclear what the actual technology is","No financial projections","Website + call centre as technology is not innovative enough for GYEC judges"],
+verdict:"Interesting African context but platform concept lacks technical specificity. Easy to outscore on technology innovation.",
+video_notes:"African disaster context is visually authentic. Platform walkthrough demo would need strong UI design to be compelling.",
+tags:["platform","Africa","disaster aid","logistics","Botswana"]},
+
+{num:105,name:"Apex",country:"Portugal",school:"TASIS Portugal",threat:"low",
+idea:"AeroSentry — Detection UAV for disaster and wildfire zones. Indicates safe vs hazardous areas to survivors. Identifies root causes of ecological collapse (toxin leaks). AI integration improves detection accuracy. Addresses Portugal's 1,000+ wildfires burning 135,000+ hectares context.",
+strengths:["Portugal wildfire context is authentic and specific","Toxin leak detection is a safety-critical and underserved function","AI accuracy improvements for detection is credible","TASIS Portugal — international school with strong resources"],
+weaknesses:["Detection only — no reconstruction or recovery component","Overlaps with AeroAid (Team 100) and FLOODGUARD (Team 96) in drone space","No financial projections visible"],
+verdict:"Detection-focused drone concept. Less comprehensive than FLOODGUARD or AeroAid. Authentic Portuguese wildfire context. TASIS typically has strong production quality.",
+video_notes:"Portugal wildfire drone footage would be visually compelling. Toxin leak detection overlay visualization is filmable. TASIS likely produces polished video.",
+tags:["UAV","drone","wildfire","toxin detection","AI","Portugal"]},
+
+{num:107,name:"Industrialisers",country:"UK (England)",school:"Bradford Grammar School",threat:"low",
+idea:"HydroSafe — Solar-powered survival bracelet for disaster preparedness. Built-in water purification, emergency comms (mesh network), family separation locator. Worn before disaster strikes. Targets South Asia, Sub-Saharan Africa, Central America via governments and NGOs.",
+strengths:["Always-worn form factor means no deployment needed — always ready","Water purification + comms + location in one bracelet is convenient","Bradford Grammar School — established UK school"],
+weaknesses:["Water purification in a bracelet is technically very constrained (volume limitations)","Multiple functions in one small device = all functions compromised","Overlaps with EchoWatch (comms wristband) and ARKIVE (identity wristband)"],
+verdict:"Multi-function survival bracelet is an interesting concept but technical feasibility of water purification at bracelet scale is a major question judges will raise.",
+video_notes:"Wearable bracelet demo is easy to film. Water purification demo from contaminated water is visually compelling if achievable. Bradford Grammar likely has decent production resources.",
+tags:["bracelet","water purification","disaster comms","wearable","solar","UK"]},
+
+{num:108,name:"NovaBridge",country:"Canada (NS)",school:"Sacred Heart School Halifax",threat:"mid",
+idea:"KenaFrame — Modular self-installable kenaf-lime biocomposite roof system for post-storm reconstruction in tropical climates. Pre-built panels lock into galvanized steel frame. Durable, low-emission, locally produced alternative to CGI metal roofing. Targets Philippines typhoon reconstruction (Typhoon Haiyan: 550,928 homes destroyed).",
+strengths:["Kenaf-lime biocomposite is genuinely novel — no other team using kenaf fibre","Self-installable by homeowners (no contractors needed) is operationally empowering","Addresses a real specific gap (CGI roofing failure under typhoon uplift)","Philippines typhoon context with Haiyan statistics is compelling","Low-emission local production"],
+weaknesses:["Roof-only system — not a complete housing solution","Kenaf supply chain in Philippines needs establishing","No financial projections visible"],
+verdict:"Genuinely innovative kenaf biocomposite roof concept. Specific and well-defined problem (CGI roof failure). Sacred Heart Halifax is less internationally known but concept is strong.",
+video_notes:"Kenaf-lime panel assembly demo would be interesting — natural fibre + lime is visually distinctive. Philippines typhoon destruction footage + KenaFrame reconstruction would be a compelling narrative arc.",
+tags:["kenaf","biocomposite","roof","Philippines","typhoon","low-emission"]},
+
+{num:110,name:"Summit",country:"Canada (AB)",school:"Foundations for the Future Charter Academy / Westmount Charter",threat:"low",
+idea:"Kottage Kit — Deployable distress relief kit for small businesses (cottage industries) within 72 hours post-disaster. Offline voucher payment system + inventory information + outreach tools. Targets cottage industries along Ring of Fire receiving zero targeted recovery support. Distributed via NGOs (UNHCR, Red Cross, Oxfam, WFP).",
+strengths:["Completely unique economic recovery focus — no other team targeting small businesses","Offline voucher system is operationally credible for no-internet disaster zones","Ring of Fire geography targets high-disaster-density region","NGO distribution model leverages existing supply chains"],
+weaknesses:["Narrow focus on cottage industries may limit perceived scale","Offline voucher system complexity not detailed","Financial projections not visible"],
+verdict:"Most unique economic recovery angle in the competition. All other teams focus on physical shelter or comms. Business recovery for micro-enterprises is genuinely underserved. Could score very high on creativity.",
+video_notes:"Cottage industry recovery story (small vendor loses livelihood → Kottage Kit enables restart) is emotionally human and different from typical disaster footage. Offline voucher demo is filmable.",
+tags:["small business","economic recovery","offline voucher","Ring of Fire","cottage industry","Canada"]},
+
+{num:113,name:"Alpha",country:"Canada (BC)",school:"J.N. Burnett Secondary School",threat:"low",
+idea:"RESC-U — ML + modular shelters shifting disaster response from reactive to proactive. ML platform forecasts displacement and shelter demand before crisis escalates. Modular shelters meet safety, hygiene, privacy, livability standards. B2B targeting governments and humanitarian organizations.",
+strengths:["Proactive ML forecasting is differentiated — prevents rather than reacts","Modular shelters with livability standards addresses dignity gap","B2B government model with clear target clients (UN, IFRC)"],
+weaknesses:["ML displacement forecasting at meaningful accuracy requires significant training data","Shelter + AI platform is two products that need to cohere","No financial projections visible"],
+verdict:"Proactive ML forecasting angle is interesting and differentiated. Combining prediction with shelter deployment is a coherent system. J.N. Burnett is less internationally known.",
+video_notes:"ML prediction dashboard visualization would be visually impressive. Modular shelter deployment demo is filmable. Proactive vs reactive framing is a strong video narrative.",
+tags:["ML","proactive","modular shelter","displacement forecasting","B2B","Canada"]},
+
+{num:149,name:"Negotiators",country:"USA (WA)",school:"Redmond High School / Eastlake HS",threat:"low",
+idea:"BP appears empty/image-only in extraction. Insufficient data for analysis.",
+strengths:["USA team likely has strong English communication","Washington state schools often have strong STEM culture"],
+weaknesses:["BP content unavailable for analysis","Unknown concept and financial detail"],
+verdict:"Insufficient data. Use AI Analyse button to fetch and review their business plan and video directly.",
+video_notes:"Unknown — use AI Analyse button to review video.",
+tags:["USA","unknown"]},
+
+{num:158,name:"GBMXA",country:"USA (CA)",school:"Monta Vista High School",threat:"mid",
+idea:"SonoClear — Ultrasonic water purification system for disaster conditions. Conventional membrane filters fail within 15-20 minutes when exposed to disaster water >500 NTU turbidity. SonoClear uses ultrasonic cavitation to purify high-turbidity water without disposable filter cartridges. 5W power profile, compatible with portable solar. Zero consumables.",
+strengths:["Addresses a real and specific failure mode of existing water filters (500+ NTU turbidity)","Zero consumable design eliminates resupply logistics in disaster zones","5W solar-compatible power is operationally practical","SDG 6 (Clean Water) alignment is explicit","Monta Vista is one of California's strongest academic high schools"],
+weaknesses:["Ultrasonic cavitation effectiveness at disaster-level water turbidity needs peer-reviewed citation","No financial projections visible","Water purification is a crowded space even in disaster response"],
+verdict:"Strong specific problem identification (filter failure >500 NTU) and credible technical solution. Monta Vista has historically strong competition teams. Mid-high threat for technical rigour.",
+video_notes:"Water purification demo with turbid disaster water → clear output is one of the most visually compelling experiments possible. Before/after turbidity comparison is a perfect camera moment. Monta Vista likely has strong production resources.",
+tags:["water purification","ultrasonic","disaster relief","zero consumable","solar","USA"]},
+
+{num:163,name:"DRiVVe",country:"USA (CA)",school:"Santa Clara High School",threat:"high"},
+];
+
+// Remove duplicates and fix
+const teamMap = {};
+TEAMS.forEach(t => { if(!teamMap[t.num]) teamMap[t.num] = t; });
+const ALL_TEAMS = Object.values(teamMap).sort((a,b) => {
+  const order = {you:0,high:1,mid:2,low:3};
+  return (order[a.threat]||3) - (order[b.threat]||3) || a.num - b.num;
+});
+
+function threatLabel(t){return{you:"YOUR TEAM",high:"HIGH THREAT",mid:"MID THREAT",low:"LOW THREAT"}[t]||"UNKNOWN";}
+function threatColor(t){return{you:"var(--accent)",high:"var(--threat-high)",mid:"var(--threat-mid)",low:"var(--threat-low)"}[t]||"var(--text-dim)";}
+
+function renderSidebar(){
+  const sections = [{k:"you",label:"YOUR TEAM"},{k:"high",label:"HIGH THREAT"},{k:"mid",label:"MID THREAT"},{k:"low",label:"LOW THREAT"}];
+  document.getElementById("tlist").innerHTML = sections.map(s => {
+    const ts = ALL_TEAMS.filter(t=>t.threat===s.k);
+    if(!ts.length) return '';
+    return `<div class="sec-group" data-sec="${s.k}">
+      <div class="sec-label">${s.label}</div>
+      ${ts.map(t=>`<button class="tbtn" id="btn-${t.num}" onclick="showTeam(${t.num})">
+        <span class="tnum">${t.num}</span>
+        <span class="tname">${t.name}</span><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-dim);flex-shrink:0">${MEMBERS[t.num]||'?'}</span>
+        <span class="tdot ${t.threat}"></span>
+      </button>`).join("")}
+    </div>`;
+  }).join("");
+}
+
+function filterTeams(q){
+  q = q.toLowerCase();
+  document.querySelectorAll(".tbtn").forEach(b=>{
+    b.style.display = b.textContent.toLowerCase().includes(q)?'':'none';
+  });
+  document.querySelectorAll(".sec-group").forEach(s=>{
+    const vis = [...s.querySelectorAll(".tbtn")].some(b=>b.style.display!=='none');
+    s.style.display = vis?'':'none';
+  });
+}
+
+function showTeam(num){
+  document.querySelectorAll(".tbtn").forEach(b=>b.classList.remove("active"));
+  const btn = document.getElementById("btn-"+num);
+  if(btn) btn.classList.add("active");
+  const t = ALL_TEAMS.find(x=>x.num===num);
+  if(!t) return;
+  const col = threatColor(t.threat);
+  const bp = `https://entreplanet.org/GYEC/submissions/2026/PR/submissions/${t.num}.pdf`;
+  const vid = VL[t.num]||"";
+  
+  let strengths = t.strengths ? t.strengths.map(s=>`<div class="row"><span class="plus">+</span>${s}</div>`).join("") : '<div class="row"><span style="color:var(--text-dim)">Use AI Analyse to generate analysis</span></div>';
+  let weaknesses = t.weaknesses ? t.weaknesses.map(w=>`<div class="row"><span class="minus">−</span>${w}</div>`).join("") : '<div class="row"><span style="color:var(--text-dim)">Use AI Analyse to generate analysis</span></div>';
+
+  document.getElementById("panel").innerHTML = `
+    <div class="th">
+      <div>
+        <div class="ttitle" style="color:${col}">${t.name}</div>
+        <div class="tsub">TEAM ${t.num} · ${t.country} · ${t.school} · ${MEMBERS[t.num]||'?'} MEMBERS</div>
+        ${t.score?`<div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--text-dim);margin-top:4px">PRELIM SCORE: <span style="color:var(--accent)">${t.score}/150</span></div>`:""}
+      </div>
+      <div class="tbadge ${t.threat}">${threatLabel(t.threat)}</div>
+    </div>
+    <div class="idea-block">
+      <div class="idea-text">${t.idea||"Business plan content unavailable. Use AI Analyse to fetch."}</div>
+      ${t.tags?`<div class="tags">${t.tags.map(tag=>`<span class="tag">${tag}</span>`).join("")}</div>`:""}
+    </div>
+    <div class="sec">
+      <div class="slabel green">Strengths</div>
+      ${strengths}
+    </div>
+    <div class="sec">
+      <div class="slabel" style="color:var(--threat-high)">Weaknesses</div>
+      ${weaknesses}
+    </div>
+    <div class="sec">
+      <div class="slabel">Verdict</div>
+      <div class="atext">${t.verdict||"Use AI Analyse to generate verdict."}</div>
+    </div>
+    ${t.video_notes?`<div class="sec"><div class="slabel orange">Video Analysis</div><div class="atext">${t.video_notes}</div></div>`:""}
+    <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border)">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">AI DEEP ANALYSIS — BP + VIDEO</div>
+      <button class="ai-btn" onclick="aiAnalyse(${t.num})" id="ai-btn-${t.num}">⚡ AI ANALYSE BP + VIDEO</button>
+      <div class="ai-res" id="ai-res-${t.num}"></div>
+    </div>
+    <div class="lrow">
+      <a class="lbtn" href="${bp}" target="_blank">📄 Business Plan</a>
+      ${vid?`<a class="lbtn" href="${vid}" target="_blank">🎥 Video</a>`:`<span class="lbtn" style="opacity:.3;cursor:default">🎥 No Link</span>`}
+    </div>`;
+}
+
+async function aiAnalyse(num){
+  const btn = document.getElementById("ai-btn-"+num);
+  const res = document.getElementById("ai-res-"+num);
+  const vid = VL[num]||"";
+  btn.disabled=true;
+  btn.innerHTML=`<span class="dots"><span></span><span></span><span></span></span> ANALYSING...`;
+  res.className="ai-res on";
+  res.innerHTML=`<span class="dots"><span></span><span></span><span></span></span> Fetching BP and video analysis...`;
+  const vidNote = vid?`Also analyse their presentation video at ${vid} — assess production quality, on-camera presence, prototype shown, communication clarity, overall video score /5.`:"";
+  try{
+    const r = await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-20250514",max_tokens:1200,
+        tools:[{type:"web_search_20250305",name:"web_search"}],
+        system:`You are a competition intelligence analyst for Team 32 "Economists" (Hwa Chong Institution Singapore, prelim score 118/150) competing in GYEC 2026 Finals. Your prelim idea was MycoShield (mycelium + geopolymer disaster housing). GYEC judges on 4 criteria: Creativity & Innovation, Finance & Production, Marketing & Market Research, Communication. Analyse competitor teams on both BP and video. Be brutally honest and strategic. Format:
+
+**IDEA** — one paragraph
+**BP STRENGTHS** — 3-4 bullet points
+**BP WEAKNESSES** — 3-4 bullet points  
+**VIDEO ANALYSIS** — production quality, on-camera presence, prototype, communication score /5
+**THREAT LEVEL** — High/Mid/Low + one sentence why
+**VERDICT** — how does this compare to Economists? What can you learn? 3 sentences max.`,
+        messages:[{role:"user",content:`Fetch and analyse BP for GYEC 2026 Team ${num}: https://entreplanet.org/GYEC/submissions/2026/PR/submissions/${num}.pdf ${vidNote}`}]
+      })
+    });
+    const data = await r.json();
+    const text = data.content?.filter(c=>c.type==="text").map(c=>c.text).join("\n")||"No analysis returned.";
+    res.innerHTML = text.replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>").replace(/\n\n/g,"<br><br>").replace(/\n/g,"<br>");
+    btn.innerHTML="✓ ANALYSED";
+    btn.style.cssText="background:var(--surface2);color:var(--accent);border:1px solid var(--accent);padding:9px 18px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;cursor:default;";
+  }catch(e){
+    res.innerHTML=`Error: ${e.message}`;
+    btn.disabled=false;
+    btn.innerHTML="⚡ RETRY";
+  }
+}
+
+const MEMBERS={1:3,2:5,3:4,5:7,6:7,7:6,8:4,9:6,14:5,18:5,20:4,22:8,23:8,24:6,26:3,29:8,32:8,41:4,42:6,43:6,45:5,46:4,47:5,51:3,53:4,58:3,60:6,61:6,65:8,74:8,77:5,79:4,81:8,84:8,85:3,86:3,87:3,88:6,89:8,90:5,91:4,92:4,93:4,96:7,97:8,98:3,99:7,100:7,101:4,103:6,105:5,106:8,107:4,108:7,110:4,113:8,149:7,158:4,163:4};
+
+function toggleTheme(){
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('themeBtn').textContent = isDark ? '☀' : '☾';
+  // update ticker bg
+  document.querySelector('.ticker').style.background = isDark ? '#000' : '';
+}
+
+renderSidebar();
+
+// Override renderSidebar and showTeam with new design
+
+function threatLabel(t){return{you:"Your Team",high:"High Threat",mid:"Mid Threat",low:"Low Threat"}[t]||"Unknown";}
+function threatColor(t){return{you:"var(--you)",high:"var(--high)",mid:"var(--mid)",low:"var(--low)"}[t]||"var(--text-dim)";}
+
+// Build ticker
+const tickerData = ALL_TEAMS.filter(t=>t.threat!=='you').slice(0,20);
+const tickerEl = document.getElementById('ticker');
+const tickerHTML = [...tickerData,...tickerData].map(t=>`<div class="ticker-item"><span class="dot ${t.threat}"></span>${t.name} · ${t.country} · ${threatLabel(t.threat).toUpperCase()}</div>`).join('');
+tickerEl.innerHTML = tickerHTML;
+
+function renderSidebar(){
+  const sections=[{k:"you",label:"Your Team"},{k:"high",label:"High Threat"},{k:"mid",label:"Mid Threat"},{k:"low",label:"Low Threat"}];
+  document.getElementById("tlist").innerHTML = sections.map(s=>{
+    const ts=ALL_TEAMS.filter(t=>t.threat===s.k);
+    if(!ts.length)return'';
+    return`<div class="group" data-sec="${s.k}">
+      <div class="group-header">
+        <span class="group-label">${s.label}</span>
+        <span class="group-line"></span>
+        <span class="group-count">${ts.length}</span>
+      </div>
+      ${ts.map(t=>`<div class="team-row" id="btn-${t.num}" onclick="showTeam(${t.num})">
+        <span class="tr-num">${t.num}</span>
+        <div class="tr-info">
+          <div class="tr-name">${t.name}</div>
+          <div class="tr-country">${t.country}</div>
+        </div>
+        <div class="tr-right">
+          <span class="tr-members">${MEMBERS[t.num]||'?'}p</span>
+          <span class="tr-threat ${t.threat}"></span>
+        </div>
+      </div>`).join('')}
+    </div>`;
+  }).join('');
+}
+
+function filterTeams(q){
+  q=q.toLowerCase();
+  document.querySelectorAll(".team-row").forEach(r=>{
+    r.style.display=r.textContent.toLowerCase().includes(q)?'':'none';
+  });
+  document.querySelectorAll(".group").forEach(g=>{
+    const vis=[...g.querySelectorAll(".team-row")].some(r=>r.style.display!=='none');
+    g.style.display=vis?'':'none';
+  });
+}
+
+function showTeam(num){
+  document.querySelectorAll(".team-row").forEach(b=>b.classList.remove("active"));
+  const btn=document.getElementById("btn-"+num);
+  if(btn)btn.classList.add("active");
+  const t=ALL_TEAMS.find(x=>x.num===num);
+  if(!t)return;
+  const bp=`https://entreplanet.org/GYEC/submissions/2026/PR/submissions/${t.num}.pdf`;
+  const vid=VL[t.num]||"";
+  const m=MEMBERS[t.num]||"?";
+
+  const strengths=t.strengths?t.strengths.map(s=>`<div class="d-list-item"><span class="d-plus">+</span>${s}</div>`).join(""):`<div class="d-list-item"><em style="color:var(--text-dim)">Use AI analysis to generate</em></div>`;
+  const weaknesses=t.weaknesses?t.weaknesses.map(w=>`<div class="d-list-item"><span class="d-minus">−</span>${w}</div>`).join(""):`<div class="d-list-item"><em style="color:var(--text-dim)">Use AI analysis to generate</em></div>`;
+  const tags=t.tags?`<div class="tags-row">${t.tags.map(tg=>`<span class="tag">${tg}</span>`).join("")}</div>`:"";
+
+  document.getElementById("panel").innerHTML=`<div class="detail-inner">
+    <div class="d-eyebrow">Team ${t.num} <span class="d-divider"></span> ${t.country} <span class="d-divider"></span> ${t.school}</div>
+    <div class="d-headline">${t.name}</div>
+    <div class="d-subhead">
+      <span>${m} Members</span>
+      <span>${t.country}</span>
+      <span>${t.school}</span>
+      ${t.score?`<span>Prelim ${t.score}/150</span>`:""}
+    </div>
+    <div class="d-badge ${t.threat}">
+      <span class="tr-threat ${t.threat}" style="width:6px;height:6px;border-radius:50%;display:inline-block"></span>
+      ${threatLabel(t.threat)}
+    </div>
+
+    <div class="d-section">
+      <div class="d-section-label">Core Idea</div>
+      <div class="d-body">${t.idea||"Business plan unavailable. Use AI analysis below."}</div>
+      ${tags}
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px">
+      <div class="d-section" style="margin-bottom:0">
+        <div class="d-section-label">Strengths</div>
+        ${strengths}
+      </div>
+      <div class="d-section" style="margin-bottom:0">
+        <div class="d-section-label">Weaknesses</div>
+        ${weaknesses}
+      </div>
+    </div>
+
+    ${t.verdict?`<div class="d-verdict"><div class="d-video-label">Verdict</div><p>${t.verdict}</p></div>`:""}
+
+    ${t.video_notes?`<div class="d-video-box">
+      <div class="d-video-label">Video Analysis</div>
+      <div class="d-body">${t.video_notes}</div>
+    </div>`:""}
+
+    <div class="ai-section">
+      <div class="ai-section-header">
+        AI Deep Analysis — BP + Video
+        <button class="ai-btn" onclick="aiAnalyse(${t.num})" id="ai-btn-${t.num}">⚡ Run Analysis</button>
+      </div>
+      <div class="ai-body" id="ai-res-${t.num}"></div>
+    </div>
+
+    <div class="links-bar">
+      <a class="link-btn" href="${bp}" target="_blank">↗ Business Plan PDF</a>
+      ${vid?`<a class="link-btn" href="${vid}" target="_blank">▶ Presentation Video</a>`:`<span class="link-btn disabled">No Video Link</span>`}
+    </div>
+  </div>`;
+}
+
+renderSidebar();
+</script>
+</body>
+</html>
